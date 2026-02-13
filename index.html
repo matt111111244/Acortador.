@@ -2,90 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATEODEV AI V16</title>
     <style>
-        * { box-sizing: border-box; }
-        body { background: #000; color: #00ff41; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .header { background: #008000; color: #fff; padding: 12px; text-align: center; font-weight: bold; font-size: 14px; border-bottom: 2px solid #00ff41; }
-        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, #000 0%, #050505 100%); }
-        .msg { padding: 10px 15px; border-radius: 8px; max-width: 85%; line-height: 1.4; font-size: 15px; position: relative; }
-        .user { align-self: flex-end; background: #111; border: 1px solid #00ff41; color: #00ff41; border-bottom-right-radius: 2px; }
-        .ai { align-self: flex-start; background: #001a00; border: 1px solid #008cff; color: #fff; border-bottom-left-radius: 2px; }
-        .status { font-size: 10px; color: #555; margin-top: 4px; text-transform: uppercase; }
-        .input-area { display: flex; padding: 15px; background: #000; border-top: 1px solid #111; gap: 8px; }
-        input { flex: 1; background: #0a0a0a; border: 1px solid #00ff41; color: #00ff41; padding: 12px; outline: none; border-radius: 4px; font-size: 16px; }
-        button { background: #00ff41; border: none; padding: 0 20px; border-radius: 4px; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.95); background: #00cc33; }
-        .loading { border-left-color: #008cff; font-style: italic; opacity: 0.7; }
+        body { background: #000; color: #0ff; font-family: monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #008000; color: white; padding: 10px; text-align: center; border-bottom: 2px solid #0f0; font-size: 12px; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 5px; max-width: 80%; font-size: 14px; word-wrap: break-word; }
+        .user { align-self: flex-end; background: #111; border: 1px solid #0f0; color: #0f0; }
+        .ai { align-self: flex-start; background: #001a33; border: 1px solid #008cff; color: white; }
+        .input-box { display: flex; padding: 10px; background: #000; border-top: 1px solid #333; }
+        input { flex: 1; background: #050505; border: 1px solid #0f0; color: #0f0; padding: 10px; outline: none; }
+        button { background: #0f0; border: none; padding: 10px 15px; font-weight: bold; margin-left: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="header">📘 MATEODEV AI V16 - STATUS: ONLINE</div>
-    <div id="chat-box">
-        <div class="msg ai">Sistema listo. Esperando órdenes, Creador Mateo.</div>
+    <div class="header">📘 MATEODEV AI V16 - SISTEMA ACTIVO</div>
+    <div id="chat">
+        <div class="msg ai">Bienvenido Creador Mateo. Sistema listo.</div>
     </div>
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="Escribe aquí..." autocomplete="off">
+    <div class="input-box">
+        <input type="text" id="minput" placeholder="Escribe..." autocomplete="off">
         <button onclick="enviar()">ENVIAR</button>
     </div>
 
     <script>
-        const API_KEY = "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";
-        const box = document.getElementById('chat-box');
-        const inp = document.getElementById('user-input');
+        const KEY = "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";
+        const chat = document.getElementById('chat');
+        const minput = document.getElementById('minput');
 
         async function enviar() {
-            const prompt = inp.value.trim();
-            if(!prompt) return;
+            const val = minput.value.trim();
+            if(!val) return;
 
-            // Mensaje del usuario
-            agregar(prompt, 'user');
-            inp.value = "";
-            
-            // Indicador de carga
-            const loadingMsg = agregar("Procesando en la red...", 'ai loading');
+            add(val, 'user');
+            minput.value = "";
+            const load = add("Conectando...", 'ai');
 
             try {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${API_KEY}`,
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + KEY
                     },
                     body: JSON.stringify({
                         "model": "google/gemini-flash-1.5-8b:free",
-                        "messages": [
-                            {"role": "system", "content": "Eres MATEODEV AI v16. Responde de forma técnica y breve. Firma siempre con 'aca esta creador mateo'."},
-                            {"role": "user", "content": prompt}
-                        ]
+                        "messages": [{"role": "user", "content": val + ". Firma como: aca esta creador mateo"}]
                     })
                 });
                 
-                const data = await response.json();
-                loadingMsg.remove();
+                const data = await res.json();
+                load.remove();
 
-                if (data.choices && data.choices[0]) {
-                    agregar(data.choices[0].message.content, 'ai');
+                if(data.choices) {
+                    add(data.choices[0].message.content, 'ai');
                 } else {
-                    agregar("❌ ERROR: El servidor no devolvió datos. Intenta de nuevo.", 'ai');
+                    add("Error: " + (data.error ? data.error.message : "Desconocido"), 'ai');
                 }
             } catch (e) {
-                loadingMsg.innerText = "❌ ERROR DE RED: Verifica tu conexión a internet.";
-                console.error(e);
+                load.innerText = "Error de Red. Prueba usar Chrome o subir el archivo a un sitio web.";
             }
         }
 
-        function agregar(texto, clase) {
+        function add(t, c) {
             const d = document.createElement('div');
-            d.className = "msg " + clase;
-            d.innerText = texto;
-            box.appendChild(d);
-            box.scrollTop = box.scrollHeight;
+            d.className = "msg " + c;
+            d.innerText = t;
+            chat.appendChild(d);
+            chat.scrollTop = chat.scrollHeight;
             return d;
         }
 
-        inp.addEventListener("keypress", (e) => { if(e.key === 'Enter') enviar(); });
+        minput.addEventListener("keypress", (e) => { if(e.key === 'Enter') enviar(); });
     </script>
 </body>
 </html>
