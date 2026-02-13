@@ -2,66 +2,62 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATEODEV AI V16</title>
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .header { background: #004400; color: #fff; padding: 10px; text-align: center; border-bottom: 2px solid #0f0; font-size: 12px; letter-spacing: 2px; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: radial-gradient(circle, #050505 0%, #000 100%); }
-        .msg { padding: 12px; border-radius: 8px; max-width: 85%; font-size: 14px; line-height: 1.4; border: 1px solid #111; }
-        .user { align-self: flex-end; background: #002200; border-color: #0f0; color: #0f0; box-shadow: 0 0 5px rgba(0,255,0,0.2); }
-        .ai { align-self: flex-start; background: #001122; border-color: #008cff; color: #fff; }
-        .input-box { display: flex; padding: 15px; background: #000; border-top: 1px solid #222; }
-        input { flex: 1; background: #0a0a0a; border: 1px solid #0f0; color: #0f0; padding: 12px; outline: none; border-radius: 4px; font-size: 16px; }
-        button { background: #0f0; border: none; padding: 0 20px; margin-left: 8px; font-weight: bold; border-radius: 4px; cursor: pointer; }
-        button:active { transform: scale(0.95); background: #00cc00; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #004400; color: white; padding: 10px; text-align: center; border-bottom: 2px solid #0f0; font-size: 11px; }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 5px; max-width: 85%; font-size: 14px; border: 1px solid #222; }
+        .user { align-self: flex-end; background: #002200; border-color: #0f0; }
+        .ai { align-self: flex-start; background: #001122; border-color: #008cff; color: white; }
+        .input-box { display: flex; padding: 10px; background: #000; border-top: 1px solid #333; }
+        input { flex: 1; background: #050505; border: 1px solid #0f0; color: #0f0; padding: 12px; outline: none; border-radius: 4px; }
+        button { background: #0f0; border: none; padding: 0 15px; font-weight: bold; margin-left: 5px; border-radius: 4px; }
     </style>
 </head>
 <body>
-    <div class="header">⚡ MATEODEV AI V16 - MULTI-NODE SYSTEM</div>
+    <div class="header">🚀 MATEODEV AI V16 - MODO ESTABLE</div>
     <div id="chat">
-        <div class="msg ai">Sistemas listos, Creador Mateo. Intentando conexión con nodos gratuitos...</div>
+        <div class="msg ai">Sistemas reiniciados. ¿Qué mensaje enviamos, Creador Mateo?</div>
     </div>
     <div class="input-box">
-        <input type="text" id="minput" placeholder="Escribe un comando..." autocomplete="off">
+        <input type="text" id="minput" placeholder="Escribe comando..." autocomplete="off">
         <button onclick="enviar()">ENVIAR</button>
     </div>
 
     <script>
         const KEY = "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";
-        const chat = document.getElementById('chat');
-        const minput = document.getElementById('minput');
-
-        // Lista de modelos de respaldo por si uno falla
         const modelos = [
-            "google/gemini-2.0-flash-exp:free",
-            "google/gemini-flash-1.5-8b:free",
             "mistralai/mistral-7b-instruct:free",
-            "huggingfaceh4/zephyr-7b-beta:free"
+            "google/gemini-flash-1.5-8b:free",
+            "huggingfaceh4/zephyr-7b-beta:free",
+            "openchat/openchat-7b:free"
         ];
 
         async function enviar() {
-            const val = minput.value.trim();
+            const input = document.getElementById('minput');
+            const val = input.value.trim();
             if(!val) return;
 
             add(val, 'user');
-            minput.value = "";
-            const load = add("Buscando nodo disponible...", 'ai');
+            input.value = "";
+            const load = add("Conectando con nodo libre...", 'ai');
 
-            // Intentar con cada modelo hasta que uno responda
-            for (let model of modelos) {
+            // Intentamos con varios modelos en orden
+            for (let m of modelos) {
                 try {
                     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": "Bearer " + KEY,
-                            "HTTP-Referer": "http://mateodev.com", 
-                            "X-Title": "MateoDev AI"
+                            "HTTP-Referer": "https://mateodev.github.io", // Referer ficticio para bypass
+                            "X-Title": "MateoDev"
                         },
                         body: JSON.stringify({
-                            "model": model,
-                            "messages": [{"role": "user", "content": val + ". Firma con: aca esta creador mateo"}]
+                            "model": m,
+                            "messages": [{"role": "user", "content": val + ". Responde corto y firma con: aca esta creador mateo"}]
                         })
                     });
                     
@@ -69,25 +65,21 @@
                     if (data.choices && data.choices[0]) {
                         load.remove();
                         add(data.choices[0].message.content, 'ai');
-                        return; // Éxito, salimos de la función
+                        return;
                     }
-                } catch (e) {
-                    console.log("Nodo " + model + " fallido, reintentando...");
-                }
+                } catch (e) { console.log("Fallo en nodo: " + m); }
             }
-            load.innerText = "❌ Todos los nodos están saturados. Intenta en 1 minuto.";
+            load.innerText = "⚠️ Nodos ocupados. Reintenta en 10 segundos.";
         }
 
         function add(t, c) {
             const d = document.createElement('div');
             d.className = "msg " + c;
             d.innerText = t;
-            chat.appendChild(d);
-            chat.scrollTop = chat.scrollHeight;
+            document.getElementById('chat').appendChild(d);
+            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
             return d;
         }
-
-        minput.addEventListener("keypress", (e) => { if(e.key === 'Enter') enviar(); });
     </script>
 </body>
 </html>
