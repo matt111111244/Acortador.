@@ -3,278 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mateo Developer | Security Hub</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>MATEODEV AI v16 - Web Edition</title>
     <style>
         :root {
-            --primary: #00f2ff; /* Cyan eléctrico */
-            --accent: #bc13fe;  /* Púrpura neón */
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(0, 242, 255, 0.3);
+            --verde: #1da1f2; /* Azul brillante */
+            --verde-hacker: #00ff41;
+            --fondo: #0a0a0a;
+            --texto: #e0e0e0;
         }
 
         body {
-            font-family: 'Orbitron', sans-serif; /* Fuente futurista si estuviera disponible, si no sans-serif */
-            background-color: var(--bg);
-            color: white;
-            margin: 0;
-            scroll-behavior: smooth;
-        }
-
-        /* Fondo Animado con Partículas */
-        #canvas {
-            position: fixed;
-            top: 0; left: 0;
-            z-index: -1;
-            filter: blur(1px);
-        }
-
-        /* Hero Section */
-        header {
+            background-color: var(--fondo);
+            color: var(--texto);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 80vh;
+            border: 2px solid var(--verde-hacker);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle, rgba(0,242,255,0.05) 0%, rgba(0,0,0,1) 80%);
+            background: #111;
+            box-shadow: 0 0 15px var(--verde-hacker);
         }
 
-        .glitch-wrapper {
+        .header {
+            background: var(--verde-hacker);
+            color: black;
+            padding: 10px;
             text-align: center;
-        }
-
-        h1 {
-            font-size: 5rem;
-            margin: 0;
-            text-transform: uppercase;
-            background: linear-gradient(to right, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px var(--primary));
-        }
-
-        /* Equipo - Diseño Mejorado */
-        .team-section {
-            padding: 100px 20px;
-            text-align: center;
-        }
-
-        .team-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .member-tag {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 15px 30px;
-            border-radius: 50px;
             font-weight: bold;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+        }
+
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
         }
 
-        .member-tag:hover {
-            background: var(--primary);
-            color: black;
-            box-shadow: 0 0 30px var(--primary);
-            transform: scale(1.1);
+        .mensaje {
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
         }
 
-        /* Seccion Riesgos */
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 80px 20px;
+        .user {
+            align-self: flex-end;
+            background: #222;
+            border-right: 4px solid var(--verde-hacker);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+        .ai {
+            align-self: flex-start;
+            background: #1a1a1a;
+            border-left: 4px solid #008cff;
         }
 
-        .card {
-            background: var(--glass);
-            border-left: 4px solid var(--accent);
-            padding: 40px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            transition: 0.4s;
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #333;
         }
 
-        .card:hover {
-            border-left: 4px solid var(--primary);
-            background: rgba(255, 255, 255, 0.1);
-            transform: skewX(-2deg);
+        input {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--verde-hacker);
+            color: var(--verde-hacker);
+            padding: 10px;
+            outline: none;
         }
 
-        .card i {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--primary);
+        button {
+            background: var(--verde-hacker);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 5px;
         }
 
-        h2 {
-            font-size: 2.5rem;
-            border-bottom: 2px solid var(--border);
-            display: inline-block;
-            margin-bottom: 40px;
+        button:hover {
+            background: #00cc33;
         }
 
-        footer {
-            padding: 50px;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            font-size: 0.9rem;
-            opacity: 0.6;
-        }
-
-        /* Animación Fade In */
-        .reveal {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: 1s all ease;
-        }
-
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--verde-hacker); }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
-
-    <header>
-        <div class="glitch-wrapper">
-            <h1 id="typewriter"></h1>
-            <p style="letter-spacing: 8px; color: var(--primary);">CYBERSECURITY SQUAD</p>
-        </div>
-    </header>
-
-    <section class="team-section reveal">
-        <h2>Operadores del Sistema</h2>
-        <div class="team-grid">
-            <div class="member-tag"><i class="fas fa-terminal"></i> MATEO</div>
-            <div class="member-tag"><i class="fas fa-code"></i> JUAN MIGUEL</div>
-            <div class="member-tag"><i class="fas fa-shield-alt"></i> ANGEL SANTIAGO JARAMILLO</div>
-            <div class="member-tag"><i class="fas fa-user-ninja"></i> CARLOS TORRES</div>
-            <div class="member-tag"><i class="fas fa-ghost"></i> BUEÑUELO ANDANTE</div>
-        </div>
-    </section>
-
-    <div class="container">
-        <h2 class="reveal">Amenazas Detectadas</h2>
-        <div class="grid">
-            <div class="card reveal">
-                <i class="fas fa-skull-crossbones"></i>
-                <h3>Inyección de Malware</h3>
-                <p>Software diseñado para infiltrarse en tu sistema sin permiso para robar o destruir información sensible.</p>
-            </div>
-            <div class="card reveal">
-                <i class="fas fa-mask"></i>
-                <h3>Ingeniería Social</h3>
-                <p>El arte de manipular personas para que entreguen sus secretos. El hacking más peligroso no usa código, usa psicología.</p>
-            </div>
-            <div class="card reveal">
-                <i class="fas fa-wifi"></i>
-                <h3>Man-in-the-Middle</h3>
-                <p>Intercepción de comunicaciones en redes Wi-Fi públicas para capturar datos bancarios en tiempo real.</p>
-            </div>
-            <div class="card reveal">
-                <i class="fas fa-database"></i>
-                <h3>Filtración de Datos</h3>
-                <p>Ataques masivos a bases de datos donde tu información privada termina vendiéndose en la Deep Web.</p>
-            </div>
-        </div>
+<div class="chat-container">
+    <div class="header">📘 MATEODEV AI v16 - STATUS: ONLINE</div>
+    <div id="chat-box">
+        <div class="mensaje ai">Hola Creador Mateo. ¿En qué puedo ayudarte hoy?</div>
     </div>
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Escribe tu comando..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
+        <button onclick="enviarMensaje()">ENVIAR</button>
+    </div>
+</div>
 
-    <footer>
-        <p>TERMINAL: MATEO_DEVELOPER // STATUS: ENCRYPTION ACTIVE</p>
-        <p>&copy; 2026 Proyect Hacking Awareness</p>
-    </footer>
+<script>
+    const API_KEY = "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";
+    const chatBox = document.getElementById('chat-box');
 
-    <script>
-        // Animación de partículas (Fondo)
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+    async function enviarMensaje() {
+        const input = document.getElementById('user-input');
+        const mensaje = input.value.trim();
+        
+        if (!mensaje) return;
 
-        let particles = [];
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 1 - 0.5;
-                this.speedY = Math.random() * 1 - 0.5;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
-            }
-            draw() {
-                ctx.fillStyle = '#00f2ff';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+        // Mostrar mensaje del usuario
+        agregarMensaje(mensaje, 'user');
+        input.value = '';
 
-        function init() {
-            for (let i = 0; i < 100; i++) {
-                particles.push(new Particle());
-            }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "google/gemini-flash-1.5-8b:free", // Modelo por defecto
+                    "messages": [
+                        {"role": "system", "content": "Eres MATEODEV AI v16, creada por Mateo. Firma con 'aca esta creador mateo'."},
+                        {"role": "user", "content": mensaje}
+                    ]
+                })
             });
-            requestAnimationFrame(animate);
-        }
-        init();
-        animate();
 
-        // Efecto Escritura Título
-        const text = "MATEO DEVELOPER";
-        let i = 0;
-        function typeWriter() {
-            if (i < text.length) {
-                document.getElementById("typewriter").innerHTML += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 150);
-            }
-        }
-        window.onload = typeWriter;
+            const data = await response.json();
+            const respuestaAI = data.choices[0].message.content;
+            agregarMensaje(respuestaAI, 'ai');
 
-        // Reveal al Scroll
-        window.addEventListener('scroll', () => {
-            const reveals = document.querySelectorAll('.reveal');
-            reveals.forEach(el => {
-                const windowHeight = window.innerHeight;
-                const revealTop = el.getBoundingClientRect().top;
-                if (revealTop < windowHeight - 50) el.classList.add('active');
-            });
-        });
-    </script>
+        } catch (error) {
+            agregarMensaje("❌ ERROR: No se pudo conectar con el servidor.", 'ai');
+        }
+    }
+
+    function agregarMensaje(texto, tipo) {
+        const div = document.createElement('div');
+        div.classList.add('mensaje', tipo);
+        div.innerText = texto;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+
 </body>
 </html>
