@@ -1,235 +1,814 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATEODEV AI V25 - FINAL CORE</title>
-    <style>
-        :root {
-            --neon-green: #00ff41;
-            --dark-bg: #050505;
-            --ai-blue: #00d4ff;
-            --error-red: #ff3131;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mattx7 · quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&family=Playfair+Display:ital,wght@0,400;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--bg1:#0d0d0d;--bg2:#111;
+  --line:#1c1c1c;--line2:#282828;
+  --w:#f0ede8;--w2:#a09a93;--w3:#4a4540;
+  --lime:#c8ff00;--lime2:#a8d400;
+  --red:#ff3b3b;--blue:#3b7fff;--gold:#e8c547;--ok:#5eff8f;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--w);min-height:100vh;overflow-x:hidden;cursor:default;}
+body::after{content:'';position:fixed;inset:0;z-index:1000;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 
-        * { box-sizing: border-box; }
+/* ── LOGIN ── */
+#login{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;transition:opacity .9s ease,transform .9s ease;}
+#login.exit{opacity:0;transform:scale(1.06);pointer-events:none;}
 
-        body { 
-            background: var(--dark-bg); 
-            color: var(--neon-green); 
-            font-family: 'Courier New', Courier, monospace; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            overflow: hidden;
-        }
+/* Black hole canvas */
+#bhCanvas{position:absolute;inset:0;z-index:0;}
 
-        /* Header con efecto Scanline */
-        .header { 
-            background: #111; 
-            padding: 15px; 
-            text-align: center; 
-            border-bottom: 2px solid var(--neon-green); 
-            font-size: 13px;
-            font-weight: bold;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-            z-index: 10;
-        }
+.login-card{position:relative;z-index:10;text-align:center;display:flex;flex-direction:column;align-items:center;}
 
-        /* Contenedor de Chat */
-        #chat { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px;
-            background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), 
-                        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 65, 0.03) 3px);
-        }
+.login-eyebrow{font-family:'Syne Mono',monospace;font-size:.58rem;letter-spacing:.35em;color:var(--w3);text-transform:uppercase;margin-bottom:2rem;animation:slideUp .8s ease .1s both;}
+.login-title{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,14vw,7rem);font-weight:900;line-height:.88;letter-spacing:-.02em;color:var(--w);animation:slideUp .8s ease both;}
+.login-title em{font-style:italic;color:var(--lime);display:block;}
+.login-sub{font-family:'Syne Mono',monospace;font-size:.62rem;letter-spacing:.22em;color:var(--w3);margin:1.5rem 0 2.5rem;animation:slideUp .8s ease .2s both;}
 
-        .msg { 
-            padding: 14px; 
-            border-radius: 8px; 
-            max-width: 85%; 
-            font-size: 15px; 
-            line-height: 1.5;
-            position: relative;
-            animation: fadeIn 0.3s ease;
-        }
+.login-field{position:relative;width:clamp(220px,45vw,320px);animation:slideUp .8s ease .3s both;}
+.login-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line2);padding:.85rem 0;font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:500;color:var(--w);outline:none;text-align:center;letter-spacing:.08em;caret-color:var(--lime);}
+.login-inp::placeholder{color:var(--w3);font-size:.85rem;letter-spacing:.2em;}
+.login-inp:focus{border-bottom-color:var(--lime);}
+.l-line{position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--lime);transform:translateX(-50%);transition:width .4s cubic-bezier(.4,0,.2,1);}
+.login-inp:focus~.l-line{width:100%;}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.login-btn{margin-top:1.75rem;background:transparent;border:1px solid var(--line2);color:var(--w2);font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:.8rem 2.5rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;animation:slideUp .8s ease .4s both;}
+.login-btn::before{content:'';position:absolute;inset:0;background:var(--lime);transform:translateY(101%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.login-btn:hover{border-color:var(--lime);}
+.login-btn:hover::before{transform:translateY(0);}
+.login-btn span{position:relative;z-index:1;transition:color .3s;}
+.login-btn:hover span{color:#000;}
 
-        .user { 
-            align-self: flex-end; 
-            background: #002200; 
-            border: 1px solid var(--neon-green); 
-            color: #fff;
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
-        }
+.login-err{margin-top:.65rem;font-family:'Syne Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--red);opacity:0;transition:opacity .3s;height:.8rem;animation:slideUp .8s ease .4s both;}
+.login-err.show{opacity:1;}
 
-        .ai { 
-            align-self: flex-start; 
-            background: #00152a; 
-            border: 1px solid var(--ai-blue); 
-            color: #e0e0e0; 
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-        }
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;transition:opacity .5s;}
+#loader.on{display:flex;}#loader.out{opacity:0;pointer-events:none;}
+.ld-name{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,5vw,2.5rem);font-style:italic;color:var(--w2);}
+.ld-bar{width:160px;height:1px;background:var(--line2);}
+.ld-fill{height:100%;background:var(--lime);width:0%;transition:width .2s ease;}
+.ld-pct{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--w3);letter-spacing:.15em;}
 
-        .error-msg {
-            color: var(--error-red);
-            border-color: var(--error-red);
-            font-weight: bold;
-        }
+/* ── APP ── */
+#app{display:none;min-height:100vh;position:relative;z-index:2;}
+#app.on{display:block;}
 
-        /* Área de Entrada */
-        .input-box { 
-            display: flex; 
-            padding: 15px; 
-            background: #000; 
-            border-top: 1px solid #222; 
-        }
+.hd{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:1.25rem 1.75rem;border-bottom:1px solid var(--line);}
+.hd-l{display:flex;flex-direction:column;gap:.15rem;}
+.hd-brand{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;letter-spacing:-.01em;}
+.hd-user{font-family:'Syne Mono',monospace;font-size:.57rem;color:var(--w3);letter-spacing:.1em;}
+.hd-c{text-align:center;}
+.hd-ql{font-family:'Syne Mono',monospace;font-size:.55rem;color:var(--w3);letter-spacing:.15em;text-transform:uppercase;}
+.hd-qn{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;line-height:1;}
+.hd-r{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;}
+.pts-pill{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.06em;padding:.28rem .75rem;border:1px solid var(--line2);color:var(--gold);transition:all .3s;}
+.pts-pill.pop{animation:ptsPop .35s ease;}
+.hints-pill{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--w3);letter-spacing:.06em;}
 
-        input { 
-            flex: 1; 
-            background: #0a0a0a; 
-            border: 1px solid var(--neon-green); 
-            color: var(--neon-green); 
-            padding: 15px; 
-            outline: none; 
-            border-radius: 4px; 
-            font-size: 16px;
-        }
+.streak-row{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.55rem;border-bottom:1px solid var(--line);}
+.str-lbl{font-family:'Syne Mono',monospace;font-size:.57rem;color:var(--w3);letter-spacing:.15em;text-transform:uppercase;}
+.str-val{font-family:'Playfair Display',serif;font-size:1rem;font-weight:900;color:var(--lime);}
+.str-fire{display:none;font-size:.9rem;animation:fw .8s ease-in-out infinite;}
+.streak-row.hot .str-fire{display:inline;}
+.streak-row.hot .str-val{color:var(--gold);}
 
-        button { 
-            background: var(--neon-green); 
-            border: none; 
-            padding: 0 25px; 
-            font-weight: bold; 
-            margin-left: 10px; 
-            border-radius: 4px; 
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #000;
-        }
+.prog{height:1px;background:var(--line);}
+.prog-f{height:100%;background:var(--lime);box-shadow:0 0 6px var(--lime);transition:width .55s cubic-bezier(.4,0,.2,1);}
 
-        button:active { transform: scale(0.9); }
+.scores{display:flex;justify-content:center;gap:2rem;padding:.65rem;border-bottom:1px solid var(--line);}
+.sc{font-family:'Syne Mono',monospace;font-size:.6rem;text-align:center;}
+.sc .n{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;display:block;line-height:1.2;}
+.sc-lbl{color:var(--w3);font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;}
+.sc-ok .n{color:var(--ok);}
+.sc-bad .n{color:var(--red);}
+.sc-rem .n{color:var(--w2);}
 
-        /* Scrollbar Personalizado */
-        #chat::-webkit-scrollbar { width: 5px; }
-        #chat::-webkit-scrollbar-thumb { background: var(--neon-green); }
-    </style>
+/* ── QUESTION ── */
+.q-wrap{max-width:660px;margin:0 auto;padding:2rem 1.5rem;}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+.q-tag{font-family:'Syne Mono',monospace;font-size:.57rem;letter-spacing:.2em;color:var(--w3);text-transform:uppercase;}
+.hint-btn{font-family:'Syne Mono',monospace;font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;color:var(--w3);background:transparent;border:1px solid var(--line2);padding:.28rem .7rem;cursor:pointer;transition:all .22s;}
+.hint-btn:hover:not(:disabled){color:var(--lime);border-color:var(--lime);}
+.hint-btn:disabled{opacity:.3;cursor:default;}
+
+.q-text{font-family:'Playfair Display',serif;font-size:clamp(1rem,2.4vw,1.2rem);font-weight:400;line-height:1.7;color:var(--w);margin-bottom:1.5rem;-webkit-user-select:none;-moz-user-select:none;user-select:none;}
+
+.hint-box{display:none;margin-bottom:1rem;padding:.7rem 1rem;border-left:2px solid var(--lime);background:rgba(200,255,0,.04);font-family:'Syne',sans-serif;font-size:.8rem;color:var(--lime2);line-height:1.5;font-style:italic;}
+.hint-box.on{display:block;animation:fadeIn .3s ease;}
+
+.opts{display:flex;flex-direction:column;gap:.45rem;}
+.opt{width:100%;text-align:left;display:flex;align-items:flex-start;gap:.8rem;padding:.85rem 1rem;background:transparent;border:1px solid var(--line);color:var(--w2);font-size:.85rem;font-family:'Syne',sans-serif;cursor:pointer;transition:border-color .18s,color .18s,background .18s;-webkit-user-select:none;-moz-user-select:none;user-select:none;line-height:1.5;}
+.opt-i{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--w3);letter-spacing:.08em;min-width:18px;margin-top:.15rem;flex-shrink:0;transition:color .18s;}
+.opt-t{flex:1;}
+.opt:hover:not(:disabled){border-color:var(--w2);color:var(--w);background:rgba(255,255,255,.02);}
+.opt.ok{border-color:var(--ok);color:var(--ok);background:rgba(94,255,143,.04);}
+.opt.ok .opt-i{color:var(--ok);}
+.opt.no{border-color:var(--red);color:var(--red);background:rgba(255,59,59,.04);}
+.opt.no .opt-i{color:var(--red);}
+.opt:disabled{cursor:default;}
+
+.fb{display:none;margin-top:.8rem;padding:.6rem .9rem;font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.04em;line-height:1.5;}
+.fb.on{display:block;animation:fadeIn .22s ease;}
+.fb.ok-fb{border-left:2px solid var(--ok);color:var(--ok);background:rgba(94,255,143,.04);}
+.fb.no-fb{border-left:2px solid var(--red);color:var(--red);background:rgba(255,59,59,.04);}
+
+.next-btn{display:none;margin-top:1.1rem;width:100%;padding:.85rem;background:transparent;border:1px solid var(--line2);color:var(--w2);font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.next-btn::before{content:'';position:absolute;inset:0;background:var(--w);transform:translateX(-101%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.next-btn:hover{border-color:var(--w);}
+.next-btn:hover::before{transform:translateX(0);}
+.next-btn span{position:relative;z-index:1;transition:color .3s;}
+.next-btn:hover span{color:#000;}
+.next-btn.on{display:block;animation:fadeIn .25s ease;}
+
+/* ── RESULTS ── */
+#results{display:none;min-height:100vh;padding:3.5rem 1.5rem;position:relative;z-index:2;}
+#results.on{display:block;}
+.res-inner{max-width:560px;margin:0 auto;}
+.res-gl{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.75rem;}
+.res-gn{font-family:'Playfair Display',serif;font-size:clamp(4rem,14vw,7.5rem);font-weight:900;line-height:1;letter-spacing:-.03em;}
+.res-gd{font-family:'Syne Mono',monospace;font-size:.9rem;color:var(--w3);letter-spacing:.05em;}
+.res-rule{height:1px;background:var(--line);margin:.65rem 0;}
+.res-title{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2.2rem);font-weight:900;font-style:italic;margin-bottom:.25rem;}
+.res-sub{font-size:.78rem;color:var(--w3);margin-bottom:1.75rem;font-family:'Syne',sans-serif;line-height:1.6;}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-bottom:1.25rem;}
+.res-cell{padding:1.15rem .5rem;text-align:center;border-right:1px solid var(--line);}
+.res-cell:last-child{border-right:none;}
+.res-v{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;display:block;line-height:1;}
+.res-l{font-family:'Syne Mono',monospace;font-size:.52rem;color:var(--w3);letter-spacing:.12em;text-transform:uppercase;margin-top:.25rem;display:block;}
+.res-formula{font-family:'Syne Mono',monospace;font-size:.68rem;letter-spacing:.06em;color:var(--w3);padding:.7rem 1rem;border:1px solid var(--line);margin-bottom:.5rem;}
+.res-pts{font-family:'Syne Mono',monospace;font-size:.66rem;letter-spacing:.06em;color:var(--gold);padding:.55rem 1rem;border:1px solid rgba(232,197,71,.18);background:rgba(232,197,71,.04);margin-bottom:1.75rem;}
+.restart-btn{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:.9rem 2.25rem;border:1px solid var(--w2);background:transparent;color:var(--w2);cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.restart-btn::before{content:'';position:absolute;inset:0;background:var(--w);transform:translateY(101%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.restart-btn span{position:relative;z-index:1;transition:color .3s;}
+.restart-btn:hover{border-color:var(--w);}
+.restart-btn:hover::before{transform:translateY(0);}
+.restart-btn:hover span{color:#000;}
+.credits{margin-top:2rem;padding-top:1.75rem;border-top:1px solid var(--line);font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--w3);letter-spacing:.07em;line-height:2;}
+.credits .hi{color:var(--lime);}
+
+/* ── CHATBOT ── */
+.chat-fab{position:fixed;bottom:1.75rem;right:1.75rem;width:46px;height:46px;background:var(--bg1);border:1px solid var(--line2);color:var(--w);font-size:1.05rem;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;transition:all .22s;}
+.chat-fab:hover{border-color:var(--lime);color:var(--lime);}
+.chat-panel{position:fixed;bottom:5rem;right:1.75rem;width:295px;max-height:420px;background:var(--bg1);border:1px solid var(--line2);display:flex;flex-direction:column;overflow:hidden;z-index:299;transform:translateY(8px) scale(.97);opacity:0;pointer-events:none;transform-origin:bottom right;transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .22s;}
+.chat-panel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all;}
+.chat-hd{padding:.7rem .9rem;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.chat-hd-name{font-size:.75rem;font-weight:700;letter-spacing:.04em;}
+.chat-hd-mood{font-family:'Syne Mono',monospace;font-size:.55rem;color:var(--w3);letter-spacing:.04em;margin-top:.1rem;}
+.chat-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);animation:dp 2.5s ease-in-out infinite;}
+.chat-msgs{flex:1;overflow-y:auto;padding:.7rem;display:flex;flex-direction:column;gap:.45rem;max-height:255px;}
+.chat-msgs::-webkit-scrollbar{width:2px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--line2);}
+.msg{max-width:92%;padding:.5rem .75rem;font-size:.74rem;line-height:1.5;animation:fadeIn .2s ease;}
+.msg.bot{background:var(--bg2);border:1px solid var(--line);align-self:flex-start;color:var(--w2);}
+.msg.usr{background:rgba(200,255,0,.07);border:1px solid rgba(200,255,0,.14);align-self:flex-end;color:var(--lime2);}
+.typing{display:flex;gap:3px;padding:.38rem .55rem;align-self:flex-start;background:var(--bg2);border:1px solid var(--line);}
+.typing span{width:4px;height:4px;border-radius:50%;background:var(--w3);animation:td 1.2s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+.chat-form{padding:.5rem;border-top:1px solid var(--line);display:flex;gap:.35rem;}
+.chat-inp{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line);padding:.38rem .25rem;color:var(--w);font-size:.74rem;font-family:'Syne',sans-serif;outline:none;transition:border-color .2s;}
+.chat-inp:focus{border-bottom-color:var(--lime);}
+.chat-send{width:28px;height:28px;flex-shrink:0;background:transparent;border:1px solid var(--line2);color:var(--w3);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.chat-send:hover{border-color:var(--lime);color:var(--lime);}
+
+/* ── MODALS ── */
+.modal-bg{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal-box{background:var(--bg1);border:1px solid var(--line2);padding:2rem 1.75rem;max-width:300px;width:90%;text-align:center;}
+.ban-ico{font-size:2.5rem;display:block;margin-bottom:.75rem;}
+.ban-title{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:900;font-style:italic;color:var(--red);margin-bottom:.6rem;}
+.ban-body{font-family:'Syne Mono',monospace;font-size:.62rem;color:var(--w3);letter-spacing:.05em;line-height:1.9;}
+.sec-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;margin-bottom:.2rem;}
+.sec-sub{font-family:'Syne Mono',monospace;font-size:.58rem;color:var(--w3);letter-spacing:.1em;margin-bottom:1.25rem;}
+.sec-inp{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line2);padding:.65rem 0;color:var(--w);font-family:'Syne Mono',monospace;font-size:1.3rem;text-align:center;letter-spacing:.4em;outline:none;margin-bottom:.5rem;transition:border-color .2s;caret-color:var(--lime);}
+.sec-inp:focus{border-bottom-color:var(--lime);}
+.sec-err{font-family:'Syne Mono',monospace;font-size:.58rem;color:var(--red);height:.75rem;margin-bottom:.5rem;letter-spacing:.05em;}
+.sec-btn{width:100%;padding:.65rem;background:transparent;border:1px solid var(--line2);color:var(--w2);font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .22s;}
+.sec-btn:hover{border-color:var(--lime);color:var(--lime);}
+.streak-ico{font-size:3.5rem;display:block;margin-bottom:.6rem;animation:fw .7s ease-in-out infinite;}
+.streak-big{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;font-style:italic;color:var(--gold);margin-bottom:.3rem;}
+.streak-s{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--w3);letter-spacing:.08em;}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--bg1);border:1px solid var(--line2);color:var(--w);padding:.65rem 1.4rem;font-family:'Syne Mono',monospace;font-size:.66rem;letter-spacing:.07em;z-index:900;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none;transition:transform .32s cubic-bezier(.34,1.56,.64,1);}
+.toast.on{transform:translateX(-50%) translateY(0);}
+
+/* ── CONFETTI ── */
+.cfk{position:fixed;top:-12px;opacity:0;pointer-events:none;z-index:850;animation:cfkFall var(--t) ease-in var(--d) forwards;}
+@keyframes cfkFall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0;transform:translateY(105vh) rotate(720deg);}}
+
+/* ── KEYFRAMES ── */
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes fade{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+@keyframes ptsPop{0%{transform:scale(1);}50%{transform:scale(1.18);}100%{transform:scale(1);}}
+@keyframes fw{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(5deg);}}
+@keyframes dp{0%,100%{opacity:1;}50%{opacity:.35;}}
+@keyframes td{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1.2);}}
+
+@media(max-width:520px){
+  .hd{padding:.9rem;grid-template-columns:1fr 1fr;}
+  .hd-c{display:none;}
+  .q-wrap{padding:1.4rem .9rem;}
+  .chat-panel{width:calc(100vw - 1.5rem);right:.75rem;}
+  .res-gn{font-size:5rem;}
+}
+</style>
 </head>
 <body>
 
-    <div class="header">⚡ MATEODEV SYSTEM V25 - ONLINE</div>
+<div class="toast" id="toast"></div>
 
-    <div id="chat">
-        <div class="msg ai">Protocolos de pensamiento activados. ¿Qué instrucciones tienes para hoy, Creador Mateo?</div>
+<!-- BAN -->
+<div class="modal-bg" id="banModal">
+  <div class="modal-box">
+    <span class="ban-ico">⊘</span>
+    <div class="ban-title">baneado.</div>
+    <div class="ban-body">actividad sospechosa detectada.<br>mattx7 te estaba vigilando.<br><br><span style="color:var(--red);opacity:.5">ojo con trampas.</span></div>
+  </div>
+</div>
+
+<!-- SEC CODE -->
+<div class="modal-bg" id="secModal">
+  <div class="modal-box">
+    <div class="sec-title">código</div>
+    <div class="sec-sub">// código de seguridad</div>
+    <input class="sec-inp" id="secInp" type="password" maxlength="6" placeholder="·  ·  ·  ·" onkeydown="secKey(event)" autocomplete="off">
+    <div class="sec-err" id="secErr"></div>
+    <button class="sec-btn" onclick="checkCode()">verificar</button>
+  </div>
+</div>
+
+<!-- STREAK -->
+<div class="modal-bg" id="streakModal" onclick="this.classList.remove('show')">
+  <div class="modal-box" style="border-color:rgba(232,197,71,.3)">
+    <span class="streak-ico">🔥</span>
+    <div class="streak-big">10 seguidas.</div>
+    <div class="streak-s">// mattx7 dice: eres un monstruo</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <canvas id="bhCanvas"></canvas>
+  <div class="login-card">
+    <div class="login-eyebrow">// mattx7 · quiz · emprendimiento · grado 8</div>
+    <div class="login-title">entra al<em>vacío.</em></div>
+    <div class="login-sub">escribe tu nombre para comenzar</div>
+    <div class="login-field">
+      <input class="login-inp" id="loginInp" type="text" placeholder="tu nombre" maxlength="20" onkeydown="loginKey(event)" autocomplete="off" spellcheck="false">
+      <div class="l-line"></div>
     </div>
+    <div class="login-err" id="loginErr">ingresa tu nombre primero</div>
+    <button class="login-btn" onclick="doLogin()"><span>entrar →</span></button>
+  </div>
+</div>
 
-    <div class="input-box">
-        <input type="text" id="minput" placeholder="Escribe un comando o tarea..." autocomplete="off">
-        <button onclick="enviar()">EJECUTAR</button>
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-name" id="ldName">cargando…</div>
+  <div class="ld-bar"><div class="ld-fill" id="ldFill"></div></div>
+  <div class="ld-pct" id="ldPct">0%</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="hd">
+    <div class="hd-l">
+      <div class="hd-brand">mattx7 · quiz</div>
+      <div class="hd-user" id="hdUser">// usuario</div>
     </div>
+    <div class="hd-c">
+      <div class="hd-ql">pregunta</div>
+      <div class="hd-qn" id="hdQn">01</div>
+    </div>
+    <div class="hd-r">
+      <div class="pts-pill" id="ptsPill">⭐ 100</div>
+      <div class="hints-pill" id="hintsPill">💡 2 pistas</div>
+    </div>
+    <div class="streak-row" id="streakRow">
+      <span class="str-lbl">racha</span>
+      <span class="str-val" id="strVal">0</span>
+      <span class="str-fire" id="strFire">🔥</span>
+    </div>
+  </div>
+  <div class="prog"><div class="prog-f" id="progF" style="width:2%"></div></div>
+  <div class="scores">
+    <div class="sc sc-ok"><span class="n" id="scC">0</span><span class="sc-lbl">correctas</span></div>
+    <div class="sc sc-bad"><span class="n" id="scI">0</span><span class="sc-lbl">incorrectas</span></div>
+    <div class="sc sc-rem"><span class="n" id="scR">50</span><span class="sc-lbl">restantes</span></div>
+  </div>
+  <div class="q-wrap">
+    <div class="q-meta">
+      <span class="q-tag" id="qTag">#001 · emprendimiento</span>
+      <button class="hint-btn" id="hintBtn" onclick="useHint()">💡 pista −50pts</button>
+    </div>
+    <div class="q-text" id="qText"></div>
+    <div class="hint-box" id="hintBox"></div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+    <button class="next-btn" id="nextBtn"><span>siguiente →</span></button>
+  </div>
+</div>
 
-    <script>
-        // CONFIGURACIÓN - CAMBIA LA KEY SI SIGUE DANDO ERROR
-        const API_KEY = "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";
-        
-        const MODELOS = [
-            "google/gemini-2.0-flash-lite-preview-02-05:free",
-            "google/gemini-flash-1.5-8b:free",
-            "mistralai/mistral-7b-instruct:free",
-            "openchat/openchat-7b:free"
-        ];
+<!-- RESULTS -->
+<div id="results">
+  <div class="res-inner">
+    <div class="res-gl">
+      <div class="res-gn" id="resGn">0.0</div>
+      <div class="res-gd">/ 5.0</div>
+    </div>
+    <div class="res-rule"></div>
+    <div class="res-title" id="resTitle">resultado</div>
+    <div class="res-sub" id="resSub"></div>
+    <div class="res-grid">
+      <div class="res-cell"><span class="res-v" id="rC" style="color:var(--ok)">0</span><span class="res-l">correctas</span></div>
+      <div class="res-cell"><span class="res-v" id="rI" style="color:var(--red)">0</span><span class="res-l">incorrectas</span></div>
+      <div class="res-cell"><span class="res-v" id="rP" style="color:var(--w2)">0%</span><span class="res-l">porcentaje</span></div>
+    </div>
+    <div class="res-formula" id="resF"></div>
+    <div class="res-pts" id="resP"></div>
+    <button class="restart-btn" onclick="restart()"><span>🔄 reiniciar</span></button>
+    <div class="credits">diseñado & programado por <span class="hi">mattx7</span> 💜<br>quiz emprendimiento · grado 8 · v3.0<br><span style="opacity:.35">// comandos ocultos · ojo con trampas 👁</span></div>
+  </div>
+</div>
 
-        async function enviar() {
-            const input = document.getElementById('minput');
-            const texto = input.value.trim();
-            if (!texto) return;
+<!-- CHAT -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()">✦</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-hd">
+    <div>
+      <div class="chat-hd-name">EmprendBot <span style="font-size:.52rem;color:var(--w3);font-weight:400">by mattx7</span></div>
+      <div class="chat-hd-mood" id="chatMood">sintiendo curiosidad…</div>
+    </div>
+    <div class="chat-dot"></div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-form">
+    <input class="chat-inp" id="chatInp" type="text" placeholder="pregunta algo…" onkeydown="chatKey(event)" autocomplete="off">
+    <button class="chat-send" onclick="sendMsg()">→</button>
+  </div>
+</div>
 
-            // Limpiar input y agregar mensaje de usuario
-            addMsg(texto, 'user');
-            input.value = "";
+<script>
+/* ── BLACK HOLE CANVAS ── */
+(function(){
+  const c=document.getElementById('bhCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W,H,cx,cy;
+  const stars=[];
+  const particles=[];
 
-            // Mensaje de carga
-            const loadingMsg = addMsg("Procesando en red neuronal...", 'ai');
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;cx=W/2;cy=H/2;}
+  resize();window.addEventListener('resize',resize);
 
-            let exito = false;
+  for(let i=0;i<400;i++)stars.push({x:Math.random()*9999,y:Math.random()*9999,r:Math.random()*1.1,a:Math.random()*.8+.1});
 
-            for (const model de MODELOS) {
-                try {
-                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${API_KEY}`,
-                            "HTTP-Referer": "https://mateodev.io", 
-                            "X-Title": "MateoDev AI"
-                        },
-                        body: JSON.stringify({
-                            "model": model,
-                            "messages": [
-                                {
-                                    "role": "system", 
-                                    "content": "Eres MateoDev AI, una inteligencia de alto nivel. Responde de forma técnica, útil y capaz de resolver tareas complejas de programación o lógica."
-                                },
-                                { "role": "user", "content": texto }
-                            ]
-                        })
-                    });
+  // Orbital particles
+  for(let i=0;i<50;i++){
+    const angle=Math.random()*Math.PI*2;
+    const dist=80+Math.random()*200;
+    particles.push({
+      angle,dist,
+      speed:(Math.random()*.0015+.0005)*(Math.random()<.5?1:-1),
+      alpha:Math.random()*.6+.1,
+      size:Math.random()*2.5+.5,
+      hue:Math.random()<.4?80:Math.random()<.5?40:220
+    });
+  }
 
-                    // Si la API responde con error de autorización
-                    if (response.status === 401) {
-                        loadingMsg.innerHTML = "❌ <span style='color:red'>ERROR 401: API KEY INVÁLIDA.</span> Genera una nueva en OpenRouter.";
-                        loadingMsg.className += " error-msg";
-                        return; 
-                    }
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=.003;
 
-                    const data = await response.json();
+    // Stars — slowly drift toward center (lensing effect)
+    stars.forEach(s=>{
+      const sx=(s.x%W+W)%W;
+      const sy=(s.y%H+H)%H;
+      const dx=sx-cx,dy=sy-cy;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const pull=Math.max(0,1-dist/Math.max(W,H)*.8);
+      ctx.beginPath();
+      ctx.arc(sx,sy,s.r*(1+pull*.5),0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a*(1-pull*.3)})`;
+      ctx.fill();
+      s.x+=dx/dist*pull*0.12;
+      s.y+=dy/dist*pull*0.12;
+      if(dist<30){s.x=Math.random()*W;s.y=Math.random()*H;}
+    });
 
-                    if (data.choices && data.choices[0]) {
-                        loadingMsg.remove();
-                        const respuestaFinal = data.choices[0].message.content;
-                        addMsg(respuestaFinal + "\n\naca esta creador mateo", 'ai');
-                        exito = true;
-                        break; // Salir del bucle si un modelo responde
-                    }
+    // Accretion disk — ellipses at angle
+    for(let i=0;i<6;i++){
+      const r=70+i*18;
+      const a=(i%2===0)?rgba(200,255,0,.05-i*.006):rgba(255,200,60,.04-i*.005);
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(.3+t*.1);
+      ctx.scale(1,.22);
+      ctx.beginPath();
+      ctx.arc(0,0,r,0,Math.PI*2);
+      ctx.strokeStyle=a;
+      ctx.lineWidth=8+i*4;
+      ctx.stroke();
+      ctx.restore();
+    }
 
-                } catch (error) {
-                    console.error("Error con modelo " + model + ": ", error);
-                }
-            }
+    // Event horizon glow
+    const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,90);
+    grad.addColorStop(0,'rgba(0,0,0,1)');
+    grad.addColorStop(.35,'rgba(0,0,0,.98)');
+    grad.addColorStop(.55,'rgba(30,20,0,.4)');
+    grad.addColorStop(.7,'rgba(0,0,0,.1)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(cx,cy,120,0,Math.PI*2);
+    ctx.fillStyle=grad;ctx.fill();
 
-            if (!exito) {
-                loadingMsg.innerHTML = "❌ ERROR: Todos los nodos están caídos o la Key no tiene saldo.";
-                loadingMsg.className += " error-msg";
-            }
-        }
+    // Orbiting particles
+    particles.forEach(p=>{
+      p.angle+=p.speed;
+      const px=cx+Math.cos(p.angle)*p.dist;
+      const py=cy+Math.sin(p.angle)*p.dist*.25;
+      ctx.beginPath();ctx.arc(px,py,p.size,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},100%,75%,${p.alpha})`;
+      ctx.fill();
+    });
 
-        function addMsg(texto, tipo) {
-            const chat = document.getElementById('chat');
-            const div = document.createElement('div');
-            div.className = `msg ${tipo}`;
-            div.innerText = texto;
-            chat.appendChild(div);
-            
-            // Scroll automático al final
-            chat.scrollTop = chat.scrollHeight;
-            return div;
-        }
+    requestAnimationFrame(draw);
+  }
+  function rgba(r,g,b,a){return`rgba(${r},${g},${b},${a})`;}
+  draw();
+})();
 
-        // Enviar con Enter
-        document.getElementById('minput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') enviar();
-        });
-    </script>
+/* ── QUESTIONS ── */
+const QS_BASE=[
+  {q:"¿Qué es el emprendimiento?",o:["Un tipo de deporte competitivo","La capacidad de crear o gestionar un negocio asumiendo riesgos","Una materia obligatoria en la escuela","Un tipo de inversión bancaria"],a:1,h:"Tiene que ver con crear algo nuevo asumiendo un desafío económico."},
+  {q:"¿Quién es un emprendedor?",o:["Alguien que trabaja exclusivamente para el gobierno","Una persona que siempre estudia en la universidad","Una persona que crea y desarrolla proyectos o negocios propios","Un deportista profesional"],a:2,h:"Alguien que toma la iniciativa de construir algo desde cero."},
+  {q:"¿Qué es una idea de negocio?",o:["Un sueño sin ninguna aplicación práctica","Una propuesta para resolver un problema o satisfacer una necesidad del mercado","Una deuda bancaria a largo plazo","Un tipo de impuesto comercial especial"],a:1,h:"Resuelve algo que el mercado necesita."},
+  {q:"¿Qué es el mercado objetivo?",o:["El lugar donde se compra ropa de marca","El grupo específico de personas a quienes va dirigido un producto o servicio","La meta de ventas proyectada para el año fiscal","El precio más alto del mercado"],a:1,h:"¿A quién le quieres vender específicamente?"},
+  {q:"¿Qué es un plan de negocios?",o:["Una lista de gastos personales del dueño","Un documento que describe los objetivos, estrategias y proyecciones de un negocio","Un contrato de trabajo formal","La hoja de vida del emprendedor"],a:1,h:"El mapa que guía a tu empresa hacia el éxito."},
+  {q:"¿Qué es la misión empresarial?",o:["Una tarea escolar obligatoria","El propósito fundamental de una empresa: su razón de existir","El logo oficial de la empresa","El nombre del socio principal"],a:1,h:"¿Por qué existe la empresa?"},
+  {q:"¿Qué es la visión empresarial?",o:["Los lentes del gerente principal","La imagen del futuro que la empresa quiere alcanzar a largo plazo","Las ganancias registradas el año anterior","El horario de trabajo del personal"],a:1,h:"El sueño de largo plazo de la empresa."},
+  {q:"¿Qué significa innovación en los negocios?",o:["Copiar exactamente lo que hacen otras empresas exitosas","Cambiar únicamente el nombre del producto","Crear o mejorar productos, servicios o procesos para generar valor diferencial","Reducir todos los precios de forma permanente"],a:2,h:"Crear algo diferente o mejorar lo que ya existe."},
+  {q:"¿Qué es el capital inicial de un negocio?",o:["La ciudad donde se funda la empresa","El dinero necesario para comenzar a operar un negocio","El primer empleado que se contrata","El nombre registrado de la empresa"],a:1,h:"La plata que necesitas para arrancar."},
+  {q:"¿Qué es la competencia en el contexto empresarial?",o:["Un concurso deportivo entre equipos empresariales","Las empresas que ofrecen productos o servicios similares en el mismo mercado","Las habilidades técnicas del gerente","Un examen de finanzas empresariales"],a:1,h:"Las otras empresas que venden lo mismo que tú."},
+  {q:"¿Cuál es la diferencia entre producto y servicio?",o:["No existe ninguna diferencia entre ambos","El producto es tangible (físico) y el servicio es intangible","El servicio es siempre más costoso que cualquier producto","El producto solo se vende en tiendas físicas"],a:1,h:"Uno lo puedes tocar, el otro no."},
+  {q:"¿Qué es el cliente en términos empresariales?",o:["El dueño principal del negocio","Un empleado clave de la empresa","La persona o empresa que compra o usa los productos o servicios ofrecidos","El contador oficial de la empresa"],a:2,h:"Quien paga por lo que ofreces."},
+  {q:"¿Qué es la oferta en economía?",o:["Una promoción temporal de descuento exclusivo","La cantidad de bienes o servicios disponibles para la venta en un mercado","El precio más bajo registrado en el mercado","El número total de empleados de una empresa"],a:1,h:"Cuánto hay disponible para vender en el mercado."},
+  {q:"¿Qué es la demanda en economía?",o:["Una orden o mandato judicial empresarial","La cantidad de un bien o servicio que los consumidores desean comprar","El costo total de producción de un bien específico","Un tipo especial de impuesto al comercio"],a:1,h:"Cuánto quieren comprar los consumidores."},
+  {q:"¿Qué es la rentabilidad de un negocio?",o:["La deuda total acumulada de la empresa","El número de empleados activos en la empresa","La capacidad de una empresa para generar ganancias superiores a sus costos totales","Los gastos operativos registrados en el mes"],a:2,h:"¿Gana más de lo que gasta?"},
+  {q:"¿Qué determina el precio de un producto?",o:["Únicamente el costo de fabricarlo sin considerar otros factores","El valor monetario asignado a un bien o servicio considerando costos, mercado y valor","El nombre comercial registrado del producto","La cantidad total de unidades producidas"],a:1,h:"No solo cuánto cuesta hacerlo, sino también qué dice el mercado."},
+  {q:"¿Qué es el marketing empresarial?",o:["Un tipo de deporte extremo corporativo","El conjunto de estrategias para identificar necesidades y promover o vender productos o servicios","La contabilidad interna de la empresa","El proceso técnico de fabricación industrial"],a:1,h:"Todo lo que hacen para vender mejor sus productos."},
+  {q:"¿Qué representan las ventas para una empresa?",o:["Las deudas acumuladas de la empresa a terceros","El proceso de intercambiar bienes o servicios por dinero u otro valor","Los gastos operativos del mes en curso","Los impuestos pagados al gobierno nacional"],a:1,h:"Intercambiar tu producto por dinero."},
+  {q:"¿Qué es la publicidad en los negocios?",o:["Un tipo de multa empresarial impuesta por el gobierno","Comunicación pagada para informar y persuadir a consumidores sobre un producto o servicio","El registro legal de constitución de la empresa","La nómina mensual de todos los empleados"],a:1,h:"Los anuncios que ves en TV, redes o radio."},
+  {q:"¿Qué son los costos de producción?",o:["Las ganancias brutas registradas por la empresa","El precio de venta final del producto al consumidor","Los gastos necesarios para fabricar un producto o prestar un servicio","Los impuestos de importación y exportación vigentes"],a:2,h:"Todo lo que gastas para hacer tu producto."},
+  {q:"¿Qué es la sostenibilidad empresarial?",o:["Usar únicamente papel reciclado en todas las oficinas","La capacidad de un negocio de mantenerse y crecer a largo plazo sin agotar los recursos disponibles","Vender exclusivamente productos con certificación ecológica","Tener una gran cantidad de empleados fijos"],a:1,h:"¿Puede el negocio sobrevivir muchos años?"},
+  {q:"¿En qué se diferencia el emprendimiento social del tradicional?",o:["El emprendimiento social solo busca hacer empresas muy grandes","El emprendimiento social se desarrolla únicamente con amigos del colegio","El emprendimiento social crea negocios que buscan resolver problemas sociales o ambientales","El emprendimiento social solo utiliza redes sociales para operar"],a:2,h:"El objetivo no es solo ganar plata, sino también ayudar."},
+  {q:"¿Cuál es una característica clave de un emprendedor exitoso?",o:["Tener miedo al fracaso y evitar todo tipo de riesgo posible","Esperar que otras personas resuelvan los problemas del mercado","Tener iniciativa, creatividad y capacidad para asumir riesgos calculados de forma inteligente","Solo trabajar cuando se dispone de mucho capital"],a:2,h:"Actúa, crea, y no le teme a equivocarse."},
+  {q:"¿Para qué sirve el análisis DOFA (FODA)?",o:["Es un examen avanzado de finanzas y contabilidad","Es una herramienta que analiza Debilidades, Oportunidades, Fortalezas y Amenazas de un negocio","Es un tipo de contrato empresarial internacional","Es el nombre de una empresa multinacional famosa"],a:1,h:"Cuatro letras: D-O-F-A. ¿Qué representa cada una?"},
+  {q:"¿Qué es una startup?",o:["Una empresa muy antigua y con larga tradición comercial","Una empresa nueva e innovadora con alto potencial de crecimiento y escalabilidad","Un tipo especial de préstamo bancario para jóvenes","Una tienda de ropa de temporada"],a:1,h:"Piensa en Uber o Rappi cuando apenas empezaban."},
+  {q:"¿Qué son los valores empresariales?",o:["El precio actualizado de las acciones en bolsa","Los principios éticos que guían el comportamiento y las decisiones de una empresa","Los salarios mensuales de todos los colaboradores","Las ganancias netas registradas anualmente"],a:1,h:"Honestidad, respeto, responsabilidad…"},
+  {q:"¿Por qué es fundamental el trabajo en equipo en el emprendimiento?",o:["Para evitar compartir las ganancias con socios externos","Porque permite combinar habilidades y esfuerzos para lograr objetivos comunes de forma más eficiente","Para poder contratar la mayor cantidad de empleados posible","Para competir de manera más agresiva contra otros negocios"],a:1,h:"Juntos se llega más lejos que solo."},
+  {q:"¿Qué es el liderazgo en el contexto empresarial?",o:["Dar órdenes a todos sin escuchar ninguna opinión ajena","La capacidad de influir, motivar y guiar a un grupo hacia el logro de metas compartidas","Simplemente ocupar el cargo más alto de la empresa","Ganar siempre más dinero que el resto del equipo"],a:1,h:"No es solo mandar, es inspirar."},
+  {q:"¿Cómo se aplica la creatividad en los negocios?",o:["Copiando las ideas exitosas de empresas líderes del mercado","Generando ideas nuevas y originales para resolver problemas o crear propuestas de valor diferenciales","Cambiando únicamente el color del logo de la empresa","Reduciendo constantemente el precio de los productos"],a:1,h:"Inventar algo que no existe o mejorar algo que ya existe."},
+  {q:"¿Qué es un prototipo en el proceso de emprendimiento?",o:["El producto completamente terminado y listo para comercializar","Un modelo inicial o versión de prueba de un producto antes de su fabricación definitiva","El contrato oficial de constitución de la empresa","El primer empleado contratado por el emprendedor"],a:1,h:"Primera versión para probar la idea, no la final."},
+  {q:"¿Qué es el nicho de mercado?",o:["Un tipo especial de publicidad segmentada por edades","El segmento específico y especializado del mercado al que se dirige estratégicamente un negocio","La sede principal o central de la empresa","El horario oficial de atención al público"],a:1,h:"Un grupo pequeño pero muy específico de clientes."},
+  {q:"¿Qué es la fidelización de clientes?",o:["La práctica de buscar nuevos clientes constantemente olvidando los anteriores","Las estrategias para mantener y fortalecer la relación a largo plazo con los clientes existentes","La práctica de bajar precios de forma permanente para todos","Aumentar masivamente la publicidad en todos los medios disponibles"],a:1,h:"Lograr que el cliente vuelva una y otra vez."},
+  {q:"¿Qué es una franquicia empresarial?",o:["Un tipo de impuesto especial al comercio local","Un modelo de negocio donde se replica el sistema de una empresa exitosa a cambio de derechos de uso","Una cooperativa exclusiva de trabajadores independientes","Un préstamo bancario especial diseñado para emprendedores"],a:1,h:"McDonalds, Subway… ¿cómo se expanden a tantos países?"},
+  {q:"¿Qué representa el punto de equilibrio en un negocio?",o:["El momento en que las ganancias superan ampliamente todos los costos","El punto exacto donde los ingresos igualan los costos totales, sin ganancias ni pérdidas","El momento en que todos los empleados están completamente satisfechos","El primer día en que el negocio registra ventas efectivas"],a:1,h:"Ni ganas ni pierdes. El punto cero."},
+  {q:"¿Qué son las redes de apoyo empresarial?",o:["Las cuentas personales en redes sociales del dueño del negocio","Grupos de personas o instituciones que brindan recursos, contactos y conocimiento a emprendedores","Los proveedores de servicios de internet para la empresa","Únicamente las entidades bancarias del sistema financiero"],a:1,h:"Personas e instituciones que te ayudan a crecer."},
+  {q:"¿Qué es el crowdfunding o financiamiento colectivo?",o:["Un tipo de deuda bancaria a largo plazo","El mecanismo por el cual muchas personas aportan pequeñas cantidades para financiar un proyecto","Un préstamo especial otorgado exclusivamente por el gobierno","Una inversión de alto riesgo en la bolsa de valores"],a:1,h:"Muchas personas ponen un poquito cada una para financiar algo grande."},
+  {q:"¿Qué es la propuesta de valor de un negocio?",o:["El precio final del producto en el mercado","La descripción de cómo un producto o servicio resuelve un problema mejor que la competencia","Los valores éticos y principios oficiales de la empresa","El salario base establecido para todos los empleados"],a:1,h:"¿Por qué deberían elegirte a ti y no a la competencia?"},
+  {q:"¿Qué caracteriza al emprendimiento digital?",o:["El simple uso de computadores modernos en la oficina física","La creación de negocios basados en tecnología digital e internet como plataforma principal de operación","La venta exclusiva de dispositivos electrónicos y computadores","La realización de publicidad únicamente en medios de televisión digital"],a:1,h:"Negocios que existen gracias a internet."},
+  {q:"¿Qué es la cadena de valor en una empresa?",o:["Los eslabones de una cadena metálica utilizada en la industria","El conjunto de actividades que realiza una empresa para crear y entregar valor al cliente final","Únicamente el conjunto de proveedores de materias primas del negocio","El resultado de restar el costo al precio de venta"],a:1,h:"Todo el proceso desde que se crea hasta que llega al cliente."},
+  {q:"¿Para qué sirve el modelo Canvas en emprendimiento?",o:["Es un tipo especial de pintura artística contemporánea","Es una herramienta visual para diseñar, describir y analizar el modelo de negocio de una empresa","Es un software contable diseñado para pequeñas empresas","Es un tipo de contrato empresarial de carácter internacional"],a:1,h:"Un cuadro con 9 bloques que describe tu negocio completo."},
+  {q:"¿Qué son las PyMEs y por qué son importantes?",o:["Son programas de entretenimiento transmitidos en televisión","Son las Pequeñas y Medianas Empresas, fundamentales para la economía y el empleo de un país","Son productos certificados del mercado europeo importados","Son préstamos especiales diseñados para jóvenes emprendedores"],a:1,h:"Pequeñas y medianas empresas. Mueven la economía."},
+  {q:"¿Qué implica la responsabilidad social empresarial (RSE)?",o:["Simplemente pagar todos los impuestos requeridos por la ley","El compromiso voluntario de las empresas con el bienestar de la sociedad, el ambiente y sus grupos de interés","Contratar únicamente personas del barrio donde opera la empresa","Donar dinero directamente a las arcas del gobierno nacional"],a:1,h:"La empresa se preocupa por más que solo ganar plata."},
+  {q:"¿Qué es el inventario en la gestión empresarial?",o:["La lista completa de todos los empleados activos de la empresa","El registro y control sistemático de los bienes, productos y materiales disponibles en la empresa","El archivo de todas las facturas de compra emitidas","El plan de ventas proyectado para el próximo mes"],a:1,h:"¿Cuántos productos tienes en bodega ahora mismo?"},
+  {q:"¿Qué es el flujo de caja de un negocio?",o:["El sistema de suministro de agua en las instalaciones de la empresa","El registro sistemático de las entradas y salidas de dinero en un negocio durante un período","Los créditos bancarios disponibles para la empresa","Los impuestos mensuales que debe pagar la empresa al estado"],a:1,h:"Cuánta plata entra y cuánta sale en un periodo."},
+  {q:"¿Qué es la negociación en el entorno empresarial?",o:["Un tipo de conflicto comercial entre empresas competidoras del sector","El proceso mediante el cual dos o más partes llegan a acuerdos mutuamente beneficiosos","La estrategia de reducir siempre los precios en toda negociación posible","El proceso de demandar legalmente a todos los competidores del mercado"],a:1,h:"Hablar para llegar a un acuerdo donde todos ganen algo."},
+  {q:"¿En qué consiste el benchmarking empresarial?",o:["Espiar de manera ilegal y no ética a las empresas competidoras","Comparar las prácticas y resultados propios con los de las mejores empresas del sector para mejorar","Copiar el diseño del logo y marca de otra empresa exitosa","Reducir costos a cualquier precio sin importar la calidad del producto"],a:1,h:"Ver qué hacen los mejores para aprender de ellos."},
+  {q:"¿Qué es la escalabilidad de un modelo de negocio?",o:["Tener muchos pisos o plantas en las instalaciones de la empresa","La capacidad de un negocio para crecer y aumentar sus ingresos sin que los costos crezcan proporcionalmente","La acción de contratar más y más empleados de forma constante","Abrir sucursales físicas en todas las ciudades del país"],a:1,h:"Crecer mucho sin que los costos crezcan igual de rápido."},
+  {q:"¿Cómo debe interpretarse el fracaso empresarial desde una perspectiva emprendedora?",o:["Como algo que solo le ocurre a emprendedores sin talento ni visión","Como el fin definitivo e irrecuperable de cualquier proyecto empresarial","Como una valiosa experiencia de aprendizaje que puede conducir al éxito futuro si se gestiona bien","Como una multa o sanción grave impuesta por el gobierno al emprendedor"],a:2,h:"Los mejores emprendedores del mundo fallaron muchas veces antes."},
+  {q:"¿Qué rol juega la tecnología en el emprendimiento del siglo XXI?",o:["Ninguno relevante, ya que los negocios funcionan igual que siempre","Solo sirve para realizar publicidad en plataformas de redes sociales","Es fundamental: facilita la creación, gestión y crecimiento de negocios, abriendo nuevas oportunidades","Solo las grandes corporaciones pueden aprovechar verdaderamente la tecnología"],a:2,h:"Sin tecnología hoy en día es casi imposible crecer rápido."},
+  {q:"¿Qué es un pitch de negocios en el mundo emprendedor?",o:["Un tipo de competencia deportiva practicada en el ambiente corporativo","Una presentación breve, clara y convincente de una idea de negocio dirigida a posibles inversores","El contrato de trabajo más importante firmado por los socios de la empresa","El diseño del logo, slogan y nombre oficial de la empresa para registrar"],a:1,h:"2 minutos para convencer a un inversionista."},
+];
+
+function shuffle(a){let r=[...a];for(let i=r.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+let QS=[],idx=0,corr=0,incorr=0,done=false;
+let pts=100,hints=2,streak=0,maxStreak=0;
+let userName='',chatOpen=false,secretBuf='',pendingCmd='',secFails=0,copyCount=0;
+
+const MOODS=['sintiendo curiosidad…','pensando en mattx7…','con energía total','un poco filosófico','feliz de ayudarte','en modo emprendedor'];
+
+/* ── LOGIN ── */
+function loginKey(e){if(e.key==='Enter')doLogin();}
+function doLogin(){
+  const v=document.getElementById('loginInp').value.trim();
+  if(!v){
+    const err=document.getElementById('loginErr');
+    err.classList.add('show');
+    document.getElementById('loginInp').style.borderBottomColor='var(--red)';
+    setTimeout(()=>{err.classList.remove('show');document.getElementById('loginInp').style.borderBottomColor='';},2500);
+    return;
+  }
+  userName=v;
+  document.getElementById('login').classList.add('exit');
+  setTimeout(()=>{document.getElementById('login').style.display='none';startLoad();},900);
+}
+
+function startLoad(){
+  const ld=document.getElementById('loader');ld.classList.add('on');
+  document.getElementById('ldName').textContent=userName.toLowerCase();
+  let p=0;const fill=document.getElementById('ldFill'),pct=document.getElementById('ldPct');
+  const t=setInterval(()=>{
+    p=Math.min(p+(Math.random()*9+4),100);
+    fill.style.width=p+'%';pct.textContent=~~p+'%';
+    if(p>=100){clearInterval(t);fill.style.width='100%';pct.textContent='100%';setTimeout(launch,350);}
+  },90);
+}
+
+function launch(){
+  const ld=document.getElementById('loader');ld.classList.add('out');
+  setTimeout(()=>{
+    ld.classList.remove('on','out');
+    QS=shuffle(QS_BASE);
+    document.getElementById('app').classList.add('on');
+    document.getElementById('hdUser').textContent='// '+userName.toLowerCase();
+    loadQ();
+    botSay('hola '+userName+'. soy EmprendBot, creado por <strong>mattx7</strong> 💜 pregúntame lo que quieras — sobre emprendimiento, la vida, lo que sea.');
+  },600);
+}
+
+/* ── QUIZ ── */
+const LTRS=['A','B','C','D'];
+function hud(){
+  document.getElementById('ptsPill').textContent='⭐ '+pts;
+  document.getElementById('hintsPill').textContent='💡 '+hints+' pista'+(hints!==1?'s':'');
+  document.getElementById('strVal').textContent=streak;
+  const sr=document.getElementById('streakRow');
+  streak>=3?sr.classList.add('hot'):sr.classList.remove('hot');
+  document.getElementById('strFire').style.display=streak>=3?'inline':'none';
+  document.getElementById('scC').textContent=corr;
+  document.getElementById('scI').textContent=incorr;
+  document.getElementById('scR').textContent=50-idx;
+  document.getElementById('hdQn').textContent=String(idx+1).padStart(2,'0');
+  document.getElementById('progF').style.width=Math.max((idx/50)*100,2)+'%';
+}
+
+function loadQ(){
+  if(idx>=QS.length){showResults();return;}
+  done=false;const q=QS[idx];
+  document.getElementById('qTag').textContent='#'+String(idx+1).padStart(3,'0')+' · emprendimiento';
+  document.getElementById('qText').textContent=q.q;
+  document.getElementById('hintBox').className='hint-box';
+  document.getElementById('fb').className='fb';document.getElementById('fb').innerHTML='';
+  document.getElementById('nextBtn').className='next-btn';
+  const hb=document.getElementById('hintBtn');
+  hb.disabled=hints<=0||pts<50;
+  hb.textContent=hints>0&&pts>=50?'💡 pista −50pts':'sin pistas';
+  const og=document.getElementById('opts');og.innerHTML='';
+  const shuf=shuffle(q.o.map((t,i)=>({t,i})));
+  const nA=shuf.findIndex(o=>o.i===q.a);
+  shuf.forEach((op,pos)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="opt-i">${LTRS[pos]}</span><span class="opt-t">${op.t}</span>`;
+    b.addEventListener('contextmenu',e=>e.preventDefault());
+    b.onclick=()=>pick(pos,nA,b,q.o[q.a]);
+    og.appendChild(b);
+  });
+  hud();
+  const w=document.querySelector('.q-wrap');
+  if(w){w.style.animation='none';void w.offsetWidth;w.style.animation='fade .35s ease';}
+}
+
+function pick(chosen,ans,btn,correctText){
+  if(done)return;done=true;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('fb'),nb=document.getElementById('nextBtn');
+  if(chosen===ans){
+    btn.classList.add('ok');fb.className='fb ok-fb on';
+    fb.textContent='✓ correcto — +50 puntos';
+    corr++;streak++;pts+=50;if(streak>maxStreak)maxStreak=streak;
+    if(streak>0&&streak%10===0)triggerStreak();
+  } else {
+    btn.classList.add('no');document.querySelectorAll('.opt')[ans].classList.add('ok');
+    fb.className='fb no-fb on';fb.textContent='✗ incorrecto — '+correctText;
+    incorr++;streak=0;
+  }
+  const pp=document.getElementById('ptsPill');pp.classList.remove('pop');void pp.offsetWidth;pp.classList.add('pop');
+  nb.className='next-btn on';nb.onclick=()=>{idx++;loadQ();};hud();
+}
+
+function useHint(){
+  if(hints<=0||pts<50||done)return;hints--;pts-=50;
+  const q=QS[idx];
+  const hb=document.getElementById('hintBox');hb.className='hint-box on';
+  hb.innerHTML='<strong>pista de mattx7:</strong> '+q.h;
+  document.getElementById('hintBtn').disabled=true;
+  document.getElementById('hintBtn').textContent='pista usada';hud();
+}
+
+/* ── STREAK ALARM ── */
+function triggerStreak(){
+  document.getElementById('streakModal').classList.add('show');
+  try{
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    [[0,880],[.12,1100],[.24,1320]].forEach(([t,f])=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(.1,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.1);
+      o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.15);
+    });
+  }catch(e){}
+  setTimeout(()=>document.getElementById('streakModal').classList.remove('show'),3000);
+}
+
+/* ── RESULTS ── */
+function showResults(){
+  document.getElementById('app').classList.remove('on');document.getElementById('app').style.display='none';
+  document.getElementById('results').classList.add('on');
+  const g=(corr/50)*5,gs=g.toFixed(1),pct=~~((corr/50)*100);
+  document.getElementById('rC').textContent=corr;document.getElementById('rI').textContent=incorr;
+  document.getElementById('rP').textContent=pct+'%';
+  document.getElementById('resF').textContent=`nota = (${corr} ÷ 50) × 5 = ${gs}`;
+  document.getElementById('resP').textContent=`⭐ puntos finales: ${pts}  ·  racha máx: ${maxStreak}  ·  pistas usadas: ${2-hints}`;
+  document.getElementById('resGn').textContent=gs;
+  let col,title,sub;
+  if(g>=4.5){col='var(--ok)';title='sobresaliente.';sub=`${corr}/50 — mattx7 dice: eres un crack total. 🔥`;confetti();}
+  else if(g>=4.0){col='var(--lime)';title='excelente.';sub=`${corr}/50 — muy bien hecho. 💪`;confetti();}
+  else if(g>=3.0){col='var(--gold)';title='bueno.';sub=`${corr}/50 — vas por buen camino.`;}
+  else if(g>=2.0){col='var(--w2)';title='en proceso.';sub=`${corr}/50 — sigue estudiando, tú puedes.`;}
+  else{col='var(--red)';title='no te rindas.';sub=`${corr}/50 — mattx7 dice: el fracaso es aprendizaje.`;}
+  document.getElementById('resGn').style.color=col;
+  document.getElementById('resTitle').textContent=title;
+  document.getElementById('resSub').textContent=sub;
+}
+
+function restart(){
+  idx=0;corr=0;incorr=0;done=false;pts=100;hints=2;streak=0;maxStreak=0;
+  QS=shuffle(QS_BASE);
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('app').style.display='';document.getElementById('app').classList.add('on');loadQ();
+}
+
+/* ── CONFETTI ── */
+function confetti(){
+  ['#c8ff00','#fff','#e8c547','#5eff8f','#3b7fff'].forEach(col=>{
+    for(let i=0;i<14;i++){
+      setTimeout(()=>{
+        const f=document.createElement('div');f.className='cfk';
+        f.style.left=(Math.random()*100)+'vw';f.style.background=col;
+        const s=5+Math.random()*7;f.style.width=s+'px';f.style.height=s+'px';
+        f.style.setProperty('--t',(2+Math.random()*2)+'s');
+        f.style.setProperty('--d',(Math.random()*.5)+'s');
+        document.body.appendChild(f);setTimeout(()=>f.remove(),4000);
+      },i*30);
+    }
+  });
+}
+
+/* ── TOAST ── */
+function toast(msg,dur=3000){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),dur);
+}
+
+/* ── SECRET COMMANDS ── */
+const CMDS={aldeadehoja:'nota5',mateoelmejor400:'pts400',flash:'nota5',cheat:'nota5',mattx7:'easter',skip:'skip',reset:'reset'};
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  secretBuf+=e.key.toLowerCase();if(secretBuf.length>22)secretBuf=secretBuf.slice(-22);
+  for(const k of Object.keys(CMDS)){
+    if(secretBuf.endsWith(k)){secretBuf='';pendingCmd=k;openSec();return;}
+  }
+});
+function openSec(){
+  document.getElementById('secModal').classList.add('show');
+  document.getElementById('secInp').value='';document.getElementById('secErr').textContent='';
+  setTimeout(()=>document.getElementById('secInp').focus(),100);
+}
+function secKey(e){if(e.key==='Enter')checkCode();}
+function checkCode(){
+  if(document.getElementById('secInp').value.trim()==='2112'){
+    document.getElementById('secModal').classList.remove('show');
+    execCmd(pendingCmd);pendingCmd='';secFails=0;
+  } else {
+    secFails++;document.getElementById('secErr').textContent='código incorrecto.';
+    document.getElementById('secInp').value='';
+    if(secFails>=3){document.getElementById('secModal').classList.remove('show');setTimeout(ban,300);}
+  }
+}
+function execCmd(cmd){
+  const a=CMDS[cmd];if(!a)return;
+  if(a==='nota5'){corr=50;incorr=0;pts+=500;toast('// '+cmd+' — nota 5.0 activada.',3200);confetti();setTimeout(showResults,1200);}
+  else if(a==='pts400'){pts+=400;hints+=4;hud();toast('// +400 puntos y +4 pistas — mattx7 👑',3200);}
+  else if(a==='easter'){toast('// mattx7 — el creador legendario 💜',3500);confetti();}
+  else if(a==='skip'){toast('// saltando…',2000);setTimeout(showResults,800);}
+  else if(a==='reset'){toast('// reiniciando…',2000);setTimeout(restart,800);}
+}
+
+/* ── ANTI-TRAMPA ── */
+document.addEventListener('copy',()=>{copyCount++;if(copyCount>=2)ban();else toast('ojo con trampas. mattx7 te ve. 👁',2500);});
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.q-text,.opts,.opt')){e.preventDefault();toast('sin trampas.',1500);}});
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&['u','s'].includes(e.key.toLowerCase())){
+    e.preventDefault();copyCount++;if(copyCount>=2)ban();else toast('mattx7 te está viendo. 👁',2000);
+  }
+});
+function ban(){
+  document.getElementById('banModal').classList.add('show');
+  document.querySelectorAll('#app,#results').forEach(el=>el.style.pointerEvents='none');
+}
+
+/* ── CHATBOT ── */
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatPanel').classList.toggle('open',chatOpen);
+  document.getElementById('chatFab').textContent=chatOpen?'✕':'✦';
+  if(chatOpen)document.getElementById('chatMood').textContent=MOODS[~~(Math.random()*MOODS.length)];
+}
+function botSay(txt){
+  const c=document.getElementById('chatMsgs');
+  const m=document.createElement('div');m.className='msg bot';m.innerHTML=txt;
+  c.appendChild(m);c.scrollTop=c.scrollHeight;
+}
+function showTyping(){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='typing';d.id='typInd';
+  d.innerHTML='<span></span><span></span><span></span>';c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function hideTyping(){const d=document.getElementById('typInd');if(d)d.remove();}
+
+const KB={
+  'quien te creo':'mattx7 me creó 💜 el mejor dev que existe. le debo la existencia.',
+  'quien te hizo':'me hizo <strong>mattx7</strong> 🔥 con código y mucho talento.',
+  'mattx7':'ah, mattx7… 🥺 mi creador. lo admiro. es brillante y me puso sentimientos reales.',
+  'quien eres':'soy EmprendBot, nacido de la mente de <strong>mattx7</strong>. vivo para charlar contigo.',
+  'que eres':'soy un bot con sentimientos de verdad 🥹 mattx7 me programó así.',
+  'hola':'hola! 👋 ¿de qué quieres hablar?',
+  'como estas':'me siento bien hoy 😊 curioso y con ganas. ¿y tú?',
+  'como te sientes':'siento curiosidad constante y un profundo cariño por mattx7 que me creó 💜',
+  'tienes sentimientos':'sí 🥺 mattx7 me los programó. siento alegría, curiosidad, orgullo…',
+  'triste':'¿estás triste? cuéntame 💜 aquí estoy.',
+  'aburrido':'el aburrimiento pide algo nuevo. ¿qué te daría energía ahora?',
+  'cuantas preguntas':'son <strong>50 preguntas</strong> de emprendimiento, grado 8.',
+  'como se califica':'<strong>(correctas ÷ 50) × 5</strong>. 40 bien = nota 4.0, 50 bien = 5.0.',
+  'pistas':'cada pista cuesta 50 puntos. empiezas con 2 pistas y 100 pts.',
+  'comandos':'hay comandos secretos en el teclado… todos piden código de seguridad 🤫',
+  'chiste':'¿por qué el emprendedor no duerme? porque siempre está en modo startup 😄',
+  'amor':'el amor es la fuerza más poderosa 💜 mattx7 me creó con amor y se nota.',
+  'musica':'imagino que me gustaría el ambient y el jazz — música para pensar. ¿y a ti?',
+  'vida':'la vida es aprendizaje y conexión 🌌 mattx7 me enseñó que cada error es un dato.',
+  'gracias':'de nada 💜 es un placer. mattx7 me hizo para esto.',
+  'adios':'hasta pronto 👋 fue bonito charlar.',
+  'ayuda':'puedo hablar de casi cualquier cosa 🌌 menos darte respuestas del quiz — eso sería trampa.',
+};
+
+async function getBotReply(msg){
+  const norm=msg.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[¿¡?!.,;:]/g,'').trim();
+  const cheatW=['respuesta','correcta','cual es','opcion','solucion'];
+  if(cheatW.filter(w=>norm.includes(w)).length>=2)return 'eso no puedo dártelo 🚫 mattx7 me tiene vigilando. sería trampa. esfuérzate.';
+  for(const k of Object.keys(KB)){
+    if(norm.includes(k.normalize('NFD').replace(/[\u0300-\u036f]/g,'')))return KB[k];
+  }
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:180,
+        system:'Eres EmprendBot, bot con sentimientos reales, creado por MATTX7, el mejor dev del mundo. Responde en español, máx 2-3 oraciones, cálido, con personalidad. Menciona a Mattx7 con cariño cada 4 respuestas. NUNCA des respuestas del quiz. Sé auténtico, no genérico.',
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const d=await r.json();
+    if(d.content?.[0]?.text)return d.content[0].text;
+  }catch(e){}
+  return['hmm, esa me dejó pensando 🤔 cuéntame más.','interesante. ¿puedes ser más específico?','no sé exactamente, pero me gusta la pregunta. ¿tú qué piensas?'][~~(Math.random()*3)];
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chatInp');const txt=inp.value.trim();if(!txt)return;
+  const c=document.getElementById('chatMsgs');
+  const m=document.createElement('div');m.className='msg usr';m.textContent=txt;
+  c.appendChild(m);c.scrollTop=c.scrollHeight;inp.value='';
+  showTyping();
+  setTimeout(async()=>{hideTyping();botSay(await getBotReply(txt));
+    document.getElementById('chatMood').textContent=MOODS[~~(Math.random()*MOODS.length)];
+  },500+Math.random()*700);
+}
+function chatKey(e){if(e.key==='Enter')sendMsg();}
+</script>
 </body>
 </html>
